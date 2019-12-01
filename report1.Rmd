@@ -1,17 +1,10 @@
 ---
 title: "データ解析入門 レポート1"
-author: "1234567 工大太郎"
+author: "1841024 遠藤颯人"
 output: html_document
 ---
 
 **課題：carsのデータをK最近傍法で予測する際の，最良のKの値を調べために，次のようなコードを実行する．**
-
-1. この箇条書きを削除する．
-1. 学生番号と氏名を自分のもので置き換える．
-1. このコードの，空行以外のすべての行に，コメントを付ける．
-1. このコードを理解するのに必要なことをすべて説明する（1000字程度）．ヒント：K最近傍法とは何か，Kの値は何を意味するか，Kの値による予測性能の違いをどうやって比較するか
-1. RStudioの「Knit」ボタンを押すとreport1.htmlができる．それをブラウザで開いて，問題がないことを確認する．
-1. report1.Rmdをローカルにダウンロードし（右下でreport1.Rmdをチェック→More→Export），名前を1234567-1.Rmdに変更（1234567の部分は自分の学生番号で置き換える），指定されたフォームで提出する．
 
 ```{r, results=FALSE, warning=FALSE, message=FALSE}
 library(tidyverse) # コメント不要
@@ -19,24 +12,28 @@ library(caret)     # コメント不要
 ```
 
 ```{r}
-set.seed(0)
-my_data <- cars
-
-my_result <- train(form = dist ~ speed,
-                   data = my_data,
-                   method = "knn",
-                   tuneGrid = expand.grid(k = c(1:15)),
-                   trControl = trainControl(method = "repeatedcv",
-                                            number = 5,
-                                            repeats = 10))
-
-my_result$results
+set.seed(0) #毎回同じ乱数を発生させる
+my_data <- cars #訓練に使うデータにcarsという名前を付ける
+my_result <- train(form = dist ~ speed, #train関数で出力変数はdistance、入力変数はspeed
+                   data = my_data, #dataはmy_dataを使用
+                   method = "knn", #手法はk最近傍法
+                   tuneGrid = expand.grid(k = c(1:15)),  #パラメータチューニングの範囲を細かく指定(kは長さ１から１５のベクトル)
+                   trControl = trainControl(method = "repeatedcv", #train関数で反復的ｋ分割交差検証を使用
+                                            number = 5, #５分割する
+                                          repeats = 10)) #１０回繰り返す
+my_result$results #my_resultsの結果
 ```
 
 ```{r}
-plot(my_result)
+plot(my_result) #my_resultをグラフ化
 ```
 
 ```{r}
-my_result$results %>% filter(RMSE == min(my_result$results$RMSE))
+my_result$results %>% filter(RMSE == min(my_result$results$RMSE)) #最小の値
 ```
+
+set.seedとは、毎回同じ乱数を発生させるという意味。my_data<-carsとは、訓練データにcarsという名前を付けるために書く必要がある。my_result<-train(form=dist~speed, data=my_data,method=”knn”, tuneGrid=expand.grid(k=c(1:15)), trControl=trainControl(method=”repeatedcv”, number=5, repeats=10)) とは、train関数で出力変数はdist、入力変数はspeed、dataはmy_dataを使用、手法はk最近傍法を使用、パラメータチューニングの範囲を細かく指定（kは長さ１から15のベクトル）、train関数で反復的k分割交差検証を使用、5分割する、と、10回繰り返すということを意味する。my_result$resultsは、my_resultを実行した結果の表示を意味している。plot(my_result)とは、my_resultで出た数値の点をグラフに置き、グラフ化するという意味。my_results$results %>% filter(RMSE==min(my_result$results$RMSE))とは、グラフの最小値を表すもの。
+訓練データとは、機械学習において、人工知能のニューラルネットワークがもともと与えられている状態の例題と答えについてのデータ。これをニューラルネットワークが出力結果が正しかったか間違っていたかを決め、最適化を行う。
+ニューラルネットワークとは、人間の脳の神経細胞のネットワークを人工ニューロンという形で数式的なモデルとして表現したもの。
+k最近傍法とは、特徴空間中の最も近い距離の訓練データを分類、回帰する手法で、これはパターン認識手法の一つ。分類とは、ｋ個のクラス分けされたデータの中で数が最も多いものに分類することで、目標変数が離散値をとる場合のこと。回帰とは、ｋ個のデータの平均値や中央などを予測結果に用いる。また、目標変数が連続値をとり、目標変数と説明変数の間の数学的関係を識別関数としてデータを探索し、それからデータを予測すること。kの値はデータを分類するにおいて、いくつの近傍のデータを見るかを意味する。kの値が３であれば、３つのデータを見るということ。もし、kの値を小さくしすぎた場合、最近傍のサンプルが異常値であれば、誤分類する可能性があるため、kの値を大きくし、近くにあるより多いほうのデータのクラスに分類する必要がある。
+パラメータチューニングとは、機械学習モデルの設定値や制限値をモデルの最適化ができるものを走査し、設定すること。
